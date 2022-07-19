@@ -507,6 +507,12 @@ config PROFILER
 	  It exposes APIs for userspace to get system profiling
 	  information.
 
+config ST21NFC
+	tristate "ST Microelectronics ST21NFC/ST54 NFC Controller Driver"
+	depends on I2C
+	help
+	  ST Microelectronics ST21NFC Near Field Communication controller support.
+
 config WIGIG_SENSING_SPI
 	tristate "Sensing over 60GHz using wil6210 / SPI bus"
 	depends on SPI && WIL6210
