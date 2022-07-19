@@ -967,6 +967,7 @@ static void wcd_mbhc_swch_irq_handler(struct wcd_mbhc *mbhc)
 	if ((mbhc->current_plug == MBHC_PLUG_TYPE_NONE) &&
 	    detection_type) {
 
+		msleep(100);
 		/* If moisture is present, then enable polling, disable
 		 * moisture detection and wait for interrupt
 		 */
