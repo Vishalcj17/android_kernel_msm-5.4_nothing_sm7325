@@ -37,6 +37,8 @@
 
 #define SEC_PANEL_NAME_MAX_LEN  256
 
+int rm692e5_aod_flag = 0;
+
 u8 dbgfs_tx_cmd_buf[SZ_4K];
 static char dsi_display_primary[MAX_CMDLINE_PARAM_LEN];
 static char dsi_display_secondary[MAX_CMDLINE_PARAM_LEN];
@@ -240,6 +242,13 @@ int dsi_display_set_backlight(struct drm_connector *connector,
 		DSI_ERR("[%s] failed to enable DSI core clocks, rc=%d\n",
 		       dsi_display->name, rc);
 		goto error;
+	}
+
+	/*set TE gpio to panel struct only when panel-ic is rm692e5*/
+	if (!strcmp("rm692e5 amoled fhd+ 120hz cmd mode dsi visionox panel", panel->name)) {
+		if (bl_lvl == panel->bl_config.bl_hbm_level) {
+			panel->bl_config.te_gpio = dsi_display->disp_te_gpio;
+		}
 	}
 
 	rc = dsi_panel_set_backlight(panel, (u32)bl_temp);
@@ -1254,6 +1263,7 @@ int dsi_display_set_power(struct drm_connector *connector,
 				DSI_WARN("failed to set load for lp1 state\n");
 		}
 		rc = dsi_panel_set_lp1(display->panel);
+		rm692e5_aod_flag = 1;
 		break;
 	case SDE_MODE_DPMS_LP2:
 		rc = dsi_panel_set_lp2(display->panel);
@@ -1268,6 +1278,7 @@ int dsi_display_set_power(struct drm_connector *connector,
 		if ((display->panel->power_mode == SDE_MODE_DPMS_LP1) ||
 			(display->panel->power_mode == SDE_MODE_DPMS_LP2))
 			rc = dsi_panel_set_nolp(display->panel);
+		rm692e5_aod_flag = 0;
 		break;
 	case SDE_MODE_DPMS_OFF:
 	default:
@@ -6005,7 +6016,7 @@ int dsi_display_dev_probe(struct platform_device *pdev)
 			DSI_WARN("panel_node %s not found\n", boot_disp->name);
 	} else {
 		panel_node = of_parse_phandle(node,
-				"qcom,dsi-default-panel", 0);
+				"qcom,dsi-dummy-panel", 0);
 		if (!panel_node)
 			DSI_WARN("default panel not found\n");
 	}
